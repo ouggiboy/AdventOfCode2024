@@ -8,7 +8,7 @@ const INPUT: &str = if TESTING {
 };
 
 fn get_sorted_lists_from_input(path: &str) -> (Vec<u64>, Vec<u64>) {
-    let file = fs::read_to_string(path).expect("Unlucky, couldnt read file.");
+    let file = fs::read_to_string(path).expect("Couldn't read file");
     let input_arr: Vec<u64> = file.split_ascii_whitespace().map(|x| x.parse::<u64>().expect("Couldn't parse number.")).collect();
     let mut left: Vec<u64> = Vec::new();
     let mut right: Vec<u64> = Vec::new();
