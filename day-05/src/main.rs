@@ -1,4 +1,5 @@
 use std::fs;
+use std::collections::HashMap;
 
 const TESTING: bool = true;
 const INPUT: &str = if TESTING {
@@ -14,9 +15,25 @@ fn get_parts(data: &str) -> (Vec<&str>, Vec<&str>) {
     (lines[..split].to_vec(), lines[split + 1..].to_vec())
 }
 
+fn make_map(upper_part: Vec<&str>) -> HashMap<u8, Vec<u8>> {
+    let mut map: HashMap<u8, Vec<u8>> = HashMap::new();
+    for rule in upper_part {
+        let mut parts = rule.split("|").map(|x| x.parse::<u8>().unwrap());
+        let (k, v) = (parts.next().unwrap(), parts.next().unwrap());
+        let prev = map.insert(k, vec![v]);
+        if let Some(mut vector) = prev {
+            vector.push(v);
+            map.insert(k, vector);
+        }
+    }
+
+    map
+}
+
 
 fn main() {
     let data = fs::read_to_string(INPUT).expect("Couldn't read file:(");
-    let x = get_parts(&data);
-    println!("{:?}", x);
+    let parts = get_parts(&data);
+    let order_map = make_map(parts.0);
+    println!("{:?}", order_map);
 }   
