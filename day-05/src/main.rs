@@ -15,10 +15,12 @@ fn get_parts(data: &str) -> (Vec<&str>, Vec<&str>) {
     (lines[..split].to_vec(), lines[split + 1..].to_vec())
 }
 
-fn make_map(upper_part: Vec<&str>) -> HashMap<u8, Vec<u8>> {
+fn make_map(rules: Vec<&str>) -> HashMap<u8, Vec<u8>> {
     let mut map: HashMap<u8, Vec<u8>> = HashMap::new();
-    for rule in upper_part {
-        let mut parts = rule.split("|").map(|x| x.parse::<u8>().unwrap());
+    for rule in rules {
+        let mut parts = rule
+            .split("|")
+            .map(|x| x.parse::<u8>().unwrap());
         let (k, v) = (parts.next().unwrap(), parts.next().unwrap());
         let prev = map.insert(k, vec![v]);
         if let Some(mut vector) = prev {
@@ -30,10 +32,10 @@ fn make_map(upper_part: Vec<&str>) -> HashMap<u8, Vec<u8>> {
     map
 }
 
-fn correct_order_update(update: &str, map: &HashMap<u8, Vec<u8>>) -> bool {
+fn is_correct_order(page: &str, map: &HashMap<u8, Vec<u8>>) -> bool {
     let mut prev_nums = Vec::<u8>::new();
 
-    for n in update.split(',').map(|i| i.parse::<u8>().unwrap()) {
+    for n in page.split(',').map(|i| i.parse::<u8>().unwrap()) {
         if let Some(v) = map.get(&n) {
             for rule in v {
                 if prev_nums.contains(rule) {
@@ -46,9 +48,45 @@ fn correct_order_update(update: &str, map: &HashMap<u8, Vec<u8>>) -> bool {
     true
 } 
 
-fn get_middle_page(update: &str) -> u64 {
-    let nums = update.split(',').map(|x| x.parse::<u64>().unwrap()).collect::<Vec<u64>>();
-    nums[(nums.len() - 1) / 2]
+fn page_to_vec(page: &str) -> Vec<u8> {
+    page
+        .split(',')
+        .map(|x| x.parse::<u8>().unwrap())
+        .collect::<Vec<u8>>()
+}
+
+fn reorder_page(page: &str, map: &HashMap<u8, Vec<u8>>) -> Vec<u8> {
+    // turn it around to work from end to beginning to sort it easier
+    let mut new_page = page_to_vec(page);
+    new_page.reverse();
+    let len = new_page.len();
+    // if last number doesnt have pages after it that appear before it keep it in place and so on
+    let mut i = 0;
+    while i < len - 1 {
+        if let Some(v) = map.get(&new_page[i]) {
+            'inner: for j in i + 1..len {
+                // check if incorrect order
+                if v.contains(&new_page[j]) {
+                    // swap the two incorrect ones between themselves
+                    new_page.swap(i, j);
+                    // continue sorting from the same spot after swap because all before it has already been checked
+                    // need to use wrapping sub in case new_page[0] gets swapped
+                    // alternative is to just reset i to 0 everytime but i think this is more efficient
+                    i = i.wrapping_sub(1);
+                    break 'inner;
+                }
+            }
+        }
+        i = i.wrapping_add(1);
+    }
+    // reverse back
+    new_page.reverse();
+    new_page
+}
+
+fn get_middle_page(page: &str) -> u64 {
+    let nums = page_to_vec(page);
+    nums[(nums.len() - 1) / 2] as u64
 }
 
 
@@ -56,8 +94,34 @@ fn main() {
     let data = fs::read_to_string(INPUT).expect("Couldn't read file:(");
     let parts = get_parts(&data);
     let map = make_map(parts.0);
-    let correct_updates = parts.1.into_iter().filter(|&u| correct_order_update(u, &map)).collect::<Vec<&str>>();
-    let page_sum = correct_updates.iter().map(|&u| get_middle_page(u)).sum::<u64>();
 
-    println!("Sum of middle pages is: {}", page_sum);
+    let correct = parts.1.clone()
+        .into_iter()
+        .filter(|&u| is_correct_order(u, &map))
+        .collect::<Vec<&str>>();
+
+    let correct_sum = correct
+        .iter()
+        .map(|&u| get_middle_page(u))
+        .sum::<u64>();
+    
+    println!("Sum of correct middle pages is: {}", correct_sum);
+
+    let incorrect = parts.1.clone()
+        .into_iter()
+        .filter(|&u| !is_correct_order(u, &map))
+        .collect::<Vec<&str>>();
+
+    let reordered = incorrect
+        .iter()
+        .map(|&u| reorder_page(u, &map))
+        .collect::<Vec<Vec<u8>>>();
+
+    let reordered_sum = reordered
+        .iter()
+        .map(|u| u[(u.len() - 1) / 2] as u64)
+        .sum::<u64>();
+
+    println!("Sum of reordered middle pages is: {}", reordered_sum);
+
 }   
