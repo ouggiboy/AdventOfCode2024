@@ -1,12 +1,13 @@
-use std::fs;
+use std::{fs, collections::HashMap};
 
-const TESTING: bool = false;
+const TESTING: bool = true;
 const INPUT: &str = if TESTING {
     "sample.txt"
 } else {
     "input.txt"
 };
 
+#[derive(Clone, Debug)]
 enum Direction {
     Up,
     Right,
@@ -80,12 +81,14 @@ fn step(direction: &mut Direction, x: &mut usize, y: &mut usize, map: &Vec<Vec<c
     true
 }
 
-fn mark(x: usize, y: usize, map: &mut Vec<Vec<char>>) -> bool {
-    if map[y][x] == '.' || map[y][x] == '^' {
-        map[y][x] = 'x';
-        return true
+fn store_direction(x: usize, y: usize, direction: &Direction, pos_map: &mut HashMap<(usize, usize), Vec<Direction>>) {
+    let key = (x, y);
+    if let Some(vector) = pos_map.get_mut(&key) {
+        vector.push(direction.clone());
+    }    
+    else {
+        pos_map.insert(key, vec![direction.clone()]);
     }
-    false
 }
 
 fn get_start_pos(map: &Vec<Vec<char>>) -> (usize, usize) {
@@ -100,17 +103,13 @@ fn get_start_pos(map: &Vec<Vec<char>>) -> (usize, usize) {
 }
 
 fn main() {
-    let mut map = get_map(INPUT);
+    let map = get_map(INPUT);
+    let mut pos_map: HashMap<(usize, usize), Vec<Direction>> = HashMap::new();
     let mut direction = Direction::Up;
     let (mut x, mut y) = get_start_pos(&map);
-    let mut pos_count = 1;
-    mark(x, y, &mut map);
-
 
     while step(&mut direction, &mut x, &mut y, &map) { 
-        if mark(x, y, &mut map) {
-            pos_count += 1;
-        }
+        store_direction(x, y, &direction, &mut pos_map);
     }
-    println!("Distinct positions: {}", pos_count);
+    println!("Distinct positions: {}", pos_map.len());
 }
