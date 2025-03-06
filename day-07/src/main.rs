@@ -24,42 +24,22 @@ fn transform_to_tuple(line: &str) -> (u64, Vec<u64>) {
     (value, numbers)
 }
 
-fn is_valid(line: &(u64, Vec<u64>)) -> bool {
-    let target = line.0;
-    let nums = &line.1;
-
-    // map to keep track of what we've tried
-    let mut map = vec!['+'; nums.len() - 1];
-
-    loop {       
-        let mut result = nums[0];
-
-        // now calculate whether we add or multiply the first number for each number in vector
-        for i in 0..map.len() {
-            if map[i] == '+' {
-                result += nums[i + 1];
-            }
-            else {
-                result *= nums[i + 1];
-            }
-        }
-        // check if this combination was correct
-        if result == target {
-            return true
-        }
-        // or if we are at the end of combinations
-        else if map == vec!['*'; nums.len() - 1] {
-            return false
-        }
-        // else start changing map to multiplication kind of like a binary numbers counts up
-        // check where is first '+' char and change it to '*' char, then change all before it back to '+'
-        else {
-            let index = map.iter().position(|&c| c == '+').unwrap();
-            map[index] = '*';
-            let slice = &mut map[..index];
-            slice.iter_mut().for_each(|c| *c = '+');
-        }
+fn validate(target: u64, current: u64, nums: &Vec<u64>, i: usize) -> bool {
+    if i == nums.len() {
+        return current == target;
     }
+    if current > target {
+        return false;
+    }
+    return validate(target, current * nums[i], nums, i + 1)
+        || validate(target, current + nums[i], nums, i + 1)
+        // this is only for part 2
+        || validate(target, concat(current, nums[i]), nums, i + 1)
+
+}
+
+fn concat(a: u64, b: u64) -> u64 {
+    a * 10u64.pow(b.to_string().len() as u32) + b
 }
 
 fn main() {
@@ -69,7 +49,7 @@ fn main() {
         .collect();
 
     let total_result: u64 = lines.iter()
-        .filter(|&line| is_valid(line))
+        .filter(|&line| validate(line.0, 0, &line.1, 0))
         .map(|valid_line| valid_line.0)
         .sum();
 
