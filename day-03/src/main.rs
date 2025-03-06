@@ -16,9 +16,16 @@ fn get_cmds(data: &str) -> Vec<&str> {
     data.split("mul").collect::<Vec<&str>>()
 }
 
+fn is_valid_p1(cmd: &str) -> bool {
+    if cmd.chars().nth(0) == Some('(') && cmd.contains(')') {
+        return cmd.find(')').is_some()
+    }
+    false
+}
+
 static mut ENABLED: bool = true;
 
-fn is_valid(cmd: &str) -> bool {
+fn is_valid_p2(cmd: &str) -> bool {
     let mut enabled_after_cmd = true;
     unsafe {
         if cmd.contains("don't()") {
@@ -33,6 +40,9 @@ fn is_valid(cmd: &str) -> bool {
         if cmd.chars().nth(0) == Some('(') && cmd.contains(')') && ENABLED {
             ENABLED = enabled_after_cmd;
             return cmd.find(')').is_some()
+        }
+        if !enabled_after_cmd {
+            ENABLED = false;
         }
     }
     false
@@ -54,15 +64,28 @@ fn get_mul(cmd: &str) -> u64 {
 fn main() {
     let data = get_inputs(INPUT);
     let mul_cmds = get_cmds(&data);
-    let valid_instructions = mul_cmds
+
+    let valid_instructions_p1 = mul_cmds.clone()
         .into_iter()
-        .filter(|&cmd| is_valid(cmd))
+        .filter(|&cmd| is_valid_p1(cmd))
         .collect::<Vec<&str>>();
 
-    let sum = valid_instructions
+    let sum_p1 = valid_instructions_p1
         .iter()
         .map(|&cmd| get_mul(cmd))
         .sum::<u64>();
 
-    println!("{}", sum);
+    let valid_instructions_p2 = mul_cmds
+        .into_iter()
+        .filter(|&cmd| is_valid_p2(cmd))
+        .collect::<Vec<&str>>();
+
+    let sum_p2 = valid_instructions_p2
+        .iter()
+        .map(|&cmd| get_mul(cmd))
+        .sum::<u64>();
+
+
+    println!("Part 1: {}", sum_p1);
+    println!("Part 2: {}", sum_p2);
 }
