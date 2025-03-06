@@ -12,7 +12,7 @@ fn get_input_rows(path: &str) -> Vec<Vec<char>> {
     let rows = data.split("\n")
         .collect::<Vec<&str>>()
         .iter()
-        .map(|row| row.to_string())
+        .map(|row| row.trim().to_string())
         .collect::<Vec<String>>();
 
     let mut rows_arr: Vec<Vec<char>> = Vec::new();
