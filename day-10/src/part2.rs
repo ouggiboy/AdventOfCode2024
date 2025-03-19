@@ -13,7 +13,7 @@ fn get_map(input: &str) -> Vec<Vec<u8>> {
         .collect()
 }
 
-fn get_score(map: &Vec<Vec<u8>>, x: i32, y: i32, n: u8, peaks: &mut Vec<(i32, i32)>) -> u16 {
+fn get_score(map: &Vec<Vec<u8>>, x: i32, y: i32, n: u8, peaks: &mut Vec<(i32, i32)>) -> u32 {
 
     // check if we are out of bounds
     if x < 0 || y < 0 || x as usize >= map[0].len() || y as usize >= map.len() {
@@ -23,8 +23,8 @@ fn get_score(map: &Vec<Vec<u8>>, x: i32, y: i32, n: u8, peaks: &mut Vec<(i32, i3
     // check if current tile is what it should be
     if map[y as usize][x as usize] == n {
         // check if we are at the end of trail and we haven't been to the end by some other route
-        if map[y as usize][x as usize] == 9 && !peaks.contains(&(x, y)) {
-            peaks.push((x, y));
+        // for part 2 we just remove the check at the end to get all the different routes to the same destination
+        if map[y as usize][x as usize] == 9 {
             return 1;
         }
         // otherwise go to each direction from that point
@@ -40,7 +40,7 @@ fn get_score(map: &Vec<Vec<u8>>, x: i32, y: i32, n: u8, peaks: &mut Vec<(i32, i3
     return 0;
 }
 
-fn get_score_sum(map: &Vec<Vec<u8>>) -> u16 {
+fn get_score_sum(map: &Vec<Vec<u8>>) -> u32 {
     let mut score_sum = 0;
     let w = map[0].len();
     let h = map.len();
@@ -60,5 +60,5 @@ fn get_score_sum(map: &Vec<Vec<u8>>) -> u16 {
 
 pub fn run(input: &str) {
     let map = get_map(input);
-    println!("Part 1: {}", get_score_sum(&map));    
+    println!("Part 2: {}", get_score_sum(&map));    
 }
