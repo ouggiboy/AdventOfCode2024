@@ -22,7 +22,7 @@ fn get_score(map: &Vec<Vec<u8>>, x: i32, y: i32, n: u8, peaks: &mut Vec<(i32, i3
 
     // check if current tile is what it should be
     if map[y as usize][x as usize] == n {
-        // check if we are at the end of trail, which gives a point
+        // check if we are at the end of trail and we haven't been to the end by some other route
         if map[y as usize][x as usize] == 9 && !peaks.contains(&(x, y)) {
             peaks.push((x, y));
             return 1;

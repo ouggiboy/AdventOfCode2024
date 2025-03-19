@@ -5,9 +5,9 @@ const INPUT: &str = "sample.txt";
 const INPUT: &str = "input.txt";
 
 mod part1;
-// mod part2;
+//mod part2;
 
 fn main() {
     part1::run(INPUT);
-    // part2::run(INPUT);
+    //part2::run(INPUT);
 }
