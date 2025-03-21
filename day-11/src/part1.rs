@@ -4,15 +4,18 @@ fn remove_leading_zeroes(stone: &str) -> String {
 
 fn transform(input: &Vec<u64>) -> Vec<u64> {
     let mut new: Vec<u64> = Vec::new();
+
     for i in 0..input.len() {
+
+        let num_str = input[i].to_string();
+
         if input[i] == 0 { 
             new.push(1);
         }
-        else if input[i].to_string().len() % 2 == 0 {
-            let s = input[i].to_string();
-            let mid = s.len() / 2;
+        else if num_str.len() % 2 == 0 {
+            let mid = num_str.len() / 2;
             // remove the stone and split it into 2
-            let halves = s.split_at(mid);
+            let halves = num_str.split_at(mid);
             // remove leading zeroes in case we split something like "1000" into "10" and "00"
             new.push(halves.0.parse().unwrap());
             new.push(remove_leading_zeroes(halves.1).parse().unwrap());
