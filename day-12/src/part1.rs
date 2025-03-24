@@ -1,4 +1,3 @@
-// basically we want to follow one diection as long as there is tiles there, after which we go down etc.
 fn calculate_perimeter(coords: &Vec<(usize, usize)>, map: &Vec<Vec<char>>) -> u64 {
     let mut perimeter = 0;
 
@@ -91,5 +90,5 @@ pub fn run(input: &Vec<Vec<char>>) {
         }
     }
 
-    println!("{}", total_price);
+    println!("Part 1: {}", total_price);
 }
