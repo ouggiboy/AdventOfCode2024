@@ -21,10 +21,11 @@ pub fn run(input: &Vec<String>) {
         let ((ax, ay), (bx, by), (mut px, mut py)) = get_parts(&group);
         px += 10000000000000.0;
         py += 10000000000000.0;
-        /* we get a pair of equations
+        /* we get a pair of equations where s is the amount of times we press A button and t is the amount of presses for B button
         ax*s + bx*t = px
         ay*s + by*t = py
-        where s is the amount of times we press A button and t is the amount of presses for B button */
+        using algebra to solve it we get s and t
+         */
         let s = (px * by - py * bx) / (ax * by - ay * bx);
         let t = (px - ax * s) / bx;
         // our answers can only be whole numbers
