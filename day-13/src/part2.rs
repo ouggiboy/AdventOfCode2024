@@ -18,7 +18,9 @@ fn get_parts(group: &str) -> ((f64, f64), (f64, f64), (f64, f64)) {
 pub fn run(input: &Vec<String>) {
     let mut total = 0;
     for group in input {
-        let ((ax, ay), (bx, by), (px, py)) = get_parts(&group);
+        let ((ax, ay), (bx, by), (mut px, mut py)) = get_parts(&group);
+        px += 10000000000000.0;
+        py += 10000000000000.0;
         /* we get a pair of equations
         ax*s + bx*t = px
         ay*s + by*t = py
@@ -30,5 +32,5 @@ pub fn run(input: &Vec<String>) {
             total += 3 * s as u64 + t as u64;
         }
     }
-    println!("Part 1: {}", total);
+    println!("Part 2: {}", total);
 }
