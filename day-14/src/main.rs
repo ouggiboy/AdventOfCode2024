@@ -7,7 +7,7 @@ const PATH: &str = "sample.txt";
 const PATH: &str = "input.txt";
 
 mod part1;
-// mod part2;
+mod part2;
 
 fn parse_input(path: &str) -> Vec<[(i64, i64); 2]> {
     let pair_map: Vec<Vec<(i64, i64)>> = fs::read_to_string(path).unwrap()
@@ -32,5 +32,5 @@ fn parse_input(path: &str) -> Vec<[(i64, i64); 2]> {
 fn main() {
     let input = parse_input(PATH);
     part1::run(&input);
-    // part2::run(&input);
+    part2::run(&input);
 }
