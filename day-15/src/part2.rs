@@ -4,6 +4,18 @@ fn is_wall(map: &Vec<Vec<char>>, (x, y): (usize, usize)) -> bool {
 fn is_box(map: &Vec<Vec<char>>, (x, y): (usize, usize)) -> bool {
     map[y][x] == '[' || map[y][x] == ']'
 }
+fn mark_left(x: usize, y: usize, i: usize, map: &mut Vec<Vec<char>>) {
+    map[i][x] = ']';
+    map[i][x - 1] = '[';
+    map[y][x] = '.';
+    map[y][x - 1] = '.';
+}
+fn mark_right(x: usize, y: usize, i: usize, map: &mut Vec<Vec<char>>) {
+    map[i][x] = '[';
+    map[i][x + 1] = ']';
+    map[y][x] = '.';
+    map[y][x + 1] = '.';
+}
 
 fn push_boxes(cmd: char, map: &mut Vec<Vec<char>>, (x, y): (usize, usize)) -> bool {
     let left_side = map[y][x] == '[';
@@ -11,42 +23,60 @@ fn push_boxes(cmd: char, map: &mut Vec<Vec<char>>, (x, y): (usize, usize)) -> bo
         '^' => {
             for i in (0..y).rev() {
                 if left_side {
-                    if is_wall(map, (x, i)) && is_wall(map, (x + 1, i)) {
+                    if is_wall(map, (x, i)) || is_wall(map, (x + 1, i)) {
                         return false;
                     }
-                    if map[i][x] == '.' && map[i][x + 1] == '.' {
-                        map[i][x] = '[';
-                        map[i][x + 1] = ']';
-                        map[y][x] = '@';
-                        map[y][x + 1] = '.';
+                    else if map[i][x] == '.' && map[i][x + 1] == '.' {
+                        mark_right(x, y, i, map);
                         return true;
                     }
-                    if map[i][x] == ']' {
-                        push_boxes(cmd, map, (x, i));
-                    }
-
-                }
-                else {
-                    if is_wall(map, (x, i)) && is_wall(map, (x - 1, i)) {
+                    else if map[i][x] == ']' && map[i][x + 1] == '[' {
+                        if push_boxes(cmd, map, (x, i)) && push_boxes(cmd, map, (x + 1, i)) {
+                            mark_right(x, y, i, map);
+                            return true;
+                        }
                         return false;
                     }
-                    if map[i][x] == '.' && map[i][x - 1] == '.' {
-                        map[i][x] = ']';
-                        map[i][x - 1] = '[';
-                        map[y][x] = '@';
-                        map[y][x - 1] = '.';
-                        return true;
+                    else if map[i][x + 1] == '[' {
+                        if push_boxes(cmd, map, (x + 1, i)) {
+                            mark_right(x, y, i, map);
+                            return true;
+                        }
+                        return false;
                     }
-                    if map[i][x] == '[' {
+                    else if map[i][x] == ']' {
                         if push_boxes(cmd, map, (x, i)) {
-                            map[i][x] = ']';
-                            map[i][x - 1] = '[';
+                            mark_right(x, y, i, map);
+                            return true;
                         }
                     }
-                    if map[i][x - 1] == ']' {
+                }
+                else {
+                    if is_wall(map, (x, i)) || is_wall(map, (x - 1, i)) {
+                        return false;
+                    }
+                    else if map[i][x] == '.' && map[i][x - 1] == '.' {
+                        mark_left(x, y, i, map);
+                        return true;
+                    }
+                    else if map[i][x] == '[' && map[i][x - 1] == ']' {
+                        if push_boxes(cmd, map, (x, i)) && push_boxes(cmd, map, (x - 1, i)) {
+                            mark_left(x, y, i, map);
+                            return true;
+                        }
+                        return false;
+                    }
+                    else if map[i][x - 1] == ']' {
                         if push_boxes(cmd, map, (x - 1, i)) {
-                            map[i][x - 1] = ']';
-                            map[i][x - 2] = '[';
+                            mark_left(x, y, i, map);
+                            return true;
+                        }
+                        return false;
+                    }
+                    else if map[i][x] == '[' {
+                        if push_boxes(cmd, map, (x, i)) {
+                            mark_left(x, y, i, map);
+                            return true;
                         }
                     }
                 }
@@ -66,7 +96,7 @@ fn push_boxes(cmd: char, map: &mut Vec<Vec<char>>, (x, y): (usize, usize)) -> bo
                         }
                         else { map[y][j] = ']'; }
                     }
-                    map[y][x] = '@';
+                    map[y][x] = '.';
                     return true;
                 }
             }
@@ -84,7 +114,7 @@ fn push_boxes(cmd: char, map: &mut Vec<Vec<char>>, (x, y): (usize, usize)) -> bo
                         }
                         else { map[y][j] = '['; }
                     }
-                    map[y][x] = '@';
+                    map[y][x] = '.';
                     return true;
                 }
             }
@@ -93,33 +123,59 @@ fn push_boxes(cmd: char, map: &mut Vec<Vec<char>>, (x, y): (usize, usize)) -> bo
         'v' => {
             for i in y + 1..map.len() {
                 if left_side {
-                    if is_wall(map, (x, i)) && is_wall(map, (x + 1, i)) {
+                    if is_wall(map, (x, i)) || is_wall(map, (x + 1, i)) {
                         return false;
                     }
-                    if map[i][x] == '.' && map[i][x + 1] == '.' {
-                        map[i][x] = '[';
-                        map[i][x + 1] = ']';
-                        map[y][x] = '@';
-                        map[y][x + 1] = '.';
+                    else if map[i][x] == '.' && map[i][x + 1] == '.' {
+                        mark_right(x, y, i, map);
                         return true;
                     }
-                    if map[i][x] == ']' {
-                        push_boxes(cmd, map, (x, i));
+                    else if map[i][x] == ']' && map[i][x + 1] == '[' {
+                        if push_boxes(cmd, map, (x, i)) && push_boxes(cmd, map, (x + 1, i)) {
+                            mark_right(x, y, i, map);
+                            return true;
+                        }
+                    }
+                    else if map[i][x + 1] == '[' {
+                        if push_boxes(cmd, map, (x + 1, i)) {
+                            mark_right(x, y, i, map);
+                            return true;
+                        }
+                    }
+                    else if map[i][x] == ']' {
+                        if push_boxes(cmd, map, (x, i)) {
+                            mark_right(x, y, i, map);
+                            return true;
+                        }
                     }
                 }
                 else {
-                    if is_wall(map, (x, i)) && is_wall(map, (x - 1, i)) {
+                    if is_wall(map, (x, i)) || is_wall(map, (x - 1, i)) {
                         return false;
                     }
-                    if map[i][x] == '.' && map[i][x - 1] == '.' {
-                        map[i][x] = ']';
-                        map[i][x - 1] = '[';
-                        map[y][x] = '@';
-                        map[y][x - 1] = '.';
-                        return true;
+                    else if map[i][x] == '.' && map[i][x - 1] == '.' {
+                        mark_left(x, y, i, map);
+                        return true
                     }
-                    if map[i][x] == '[' {
-                        push_boxes(cmd, map, (x, i));
+                    else if map[i][x] == '[' && map[i][x - 1] == ']' {
+                        if push_boxes(cmd, map, (x, i)) && push_boxes(cmd, map, (x - 1, i)) {
+                            mark_left(x, y, i, map);
+                            return true;
+                        }
+                        return false;
+                    }
+                    else if map[i][x - 1] == ']' {
+                        if push_boxes(cmd, map, (x - 1, i)) {
+                            mark_left(x, y, i, map);
+                            return true;
+                        }
+                        return false;
+                    }
+                    else if map[i][x] == '[' {
+                        if push_boxes(cmd, map, (x, i)) {
+                            mark_left(x, y, i, map);
+                            return true;
+                        }
                     }
                 }
             }
@@ -199,7 +255,6 @@ fn expanded_map(map: &Vec<Vec<char>>) -> Vec<Vec<char>> {
 
 pub fn run(input: &(Vec<Vec<char>>, String)) {
     let mut map = expanded_map(&input.0);
-    println!("{:?}", map);
     let cmds = &input.1;
     let mut pos = (0, 0);
     'start_finder: for y in 0..map.len() {
@@ -212,16 +267,14 @@ pub fn run(input: &(Vec<Vec<char>>, String)) {
     };
 
     for cmd in cmds.chars() {
-        println!("Move: {cmd}");
         move_robot(cmd, &mut map, &mut pos);
-        println!("{:?}\n", map);
     }
-
+    
     let mut sum = 0;
-
+    
     for y in 0..map.len() {
         for x in 0..map[0].len() {
-            if map[y][x] == 'O' {
+            if map[y][x] == '[' {
                 sum += 100 * y + x;
             }
         }
