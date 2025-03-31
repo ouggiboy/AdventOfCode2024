@@ -56,10 +56,10 @@ pub fn run(input: &Vec<Vec<char>>) {
     let (mut x, mut y) = (1usize, map.len() - 2);
     let (end_x, end_y) = (map[0].len() - 2, 1);
     let mut dir = (1, 0);
-    let mut visited: HashMap<(usize, usize), (usize, usize)> = HashMap::with_capacity((map.len() - 1) * (map[0].len() - 1));
+    let mut visited: HashMap<(usize, usize), (usize, usize)> = HashMap::new();
 
     let mut low = usize::MAX;
     find_paths(&mut x, &mut y, map, &mut dir, &mut visited, end_x, end_y, 0, 0, &mut low);
 
-    println!("{}", low);
+    println!("Part 1: {}", low);
 }
