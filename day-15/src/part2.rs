@@ -17,6 +17,124 @@ fn mark_right(x: usize, y: usize, i: usize, map: &mut Vec<Vec<char>>) {
     map[y][x + 1] = '.';
 }
 
+fn can_push(cmd: char, map: &Vec<Vec<char>>, (x, y): (usize, usize)) -> bool {
+    let left_side = map[y][x] == '[';
+    if cmd == '^' {
+        for i in (0..y).rev() {
+            if left_side {
+                if is_wall(map, (x, i)) || is_wall(map, (x + 1, i)) {
+                    return false;
+                }
+                else if map[i][x] == '.' && map[i][x + 1] == '.' {
+                    return true;
+                }
+                else if map[i][x] == ']' && map[i][x + 1] == '[' {
+                    if can_push(cmd, map, (x, i)) && can_push(cmd, map, (x + 1, i)) {
+                        return true;
+                    }
+                    return false;
+                }
+                else if map[i][x + 1] == '[' {
+                    if can_push(cmd, map, (x + 1, i)) {
+                        return true;
+                    }
+                    return false;
+                }
+                else if map[i][x] == ']' {
+                    if can_push(cmd, map, (x, i)) {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            else {
+                if is_wall(map, (x, i)) || is_wall(map, (x - 1, i)) {
+                    return false;
+                }
+                else if map[i][x] == '.' && map[i][x - 1] == '.' {
+                    return true;
+                }
+                else if map[i][x] == '[' && map[i][x - 1] == ']' {
+                    if can_push(cmd, map, (x - 1, i)) && can_push(cmd, map, (x, i)) {
+                        return true;
+                    }
+                    return false;
+                }
+                else if map[i][x - 1] == ']' {
+                    if can_push(cmd, map, (x - 1, i)) {
+                        return true;
+                    }
+                    return false;
+                }
+                else if map[i][x] == '[' {
+                    if can_push(cmd, map, (x, i)) {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            
+        }
+    }
+    if cmd == 'v' {
+        for i in y + 1..map.len() {
+            if left_side {
+                if is_wall(map, (x, i)) || is_wall(map, (x + 1, i)) {
+                    return false;
+                }
+                else if map[i][x] == '.' && map[i][x + 1] == '.' {
+                    return true;
+                }
+                else if map[i][x] == ']' && map[i][x + 1] == '[' {
+                    if can_push(cmd, map, (x, i)) && can_push(cmd, map, (x + 1, i)) {
+                        return true;
+                    }
+                    return false;
+                }
+                else if map[i][x + 1] == '[' {
+                    if can_push(cmd, map, (x + 1, i)) {
+                        return true;
+                    }
+                    return false;
+                }
+                else if map[i][x] == ']' {
+                    if can_push(cmd, map, (x, i)) {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+            else {
+                if is_wall(map, (x, i)) || is_wall(map, (x - 1, i)) {
+                    return false;
+                }
+                else if map[i][x] == '.' && map[i][x - 1] == '.' {
+                    return true
+                }
+                else if map[i][x] == '[' && map[i][x - 1] == ']' {
+                    if can_push(cmd, map, (x - 1, i)) && can_push(cmd, map, (x, i)) {
+                        return true;
+                    }
+                    return false;
+                }
+                else if map[i][x - 1] == ']' {
+                    if can_push(cmd, map, (x - 1, i)) {
+                        return true;
+                    }
+                    return false;
+                }
+                else if map[i][x] == '[' {
+                    if can_push(cmd, map, (x, i)) {
+                        return true;
+                    }
+                    return false;
+                }
+            }
+        }
+    }
+    false
+}
+
 fn push_boxes(cmd: char, map: &mut Vec<Vec<char>>, (x, y): (usize, usize)) -> bool {
     let left_side = map[y][x] == '[';
     match cmd {
@@ -31,7 +149,9 @@ fn push_boxes(cmd: char, map: &mut Vec<Vec<char>>, (x, y): (usize, usize)) -> bo
                         return true;
                     }
                     else if map[i][x] == ']' && map[i][x + 1] == '[' {
-                        if push_boxes(cmd, map, (x, i)) && push_boxes(cmd, map, (x + 1, i)) {
+                        if can_push(cmd, map, (x, i)) && can_push(cmd, map, (x + 1, i)) {
+                            push_boxes(cmd, map, (x, i));
+                            push_boxes(cmd, map, (x + 1, i));
                             mark_right(x, y, i, map);
                             return true;
                         }
@@ -49,6 +169,7 @@ fn push_boxes(cmd: char, map: &mut Vec<Vec<char>>, (x, y): (usize, usize)) -> bo
                             mark_right(x, y, i, map);
                             return true;
                         }
+                        return false;
                     }
                 }
                 else {
@@ -60,7 +181,9 @@ fn push_boxes(cmd: char, map: &mut Vec<Vec<char>>, (x, y): (usize, usize)) -> bo
                         return true;
                     }
                     else if map[i][x] == '[' && map[i][x - 1] == ']' {
-                        if push_boxes(cmd, map, (x, i)) && push_boxes(cmd, map, (x - 1, i)) {
+                        if can_push(cmd, map, (x - 1, i)) && can_push(cmd, map, (x, i)) {
+                            push_boxes(cmd, map, (x - 1, i));
+                            push_boxes(cmd, map, (x, i));
                             mark_left(x, y, i, map);
                             return true;
                         }
@@ -78,6 +201,7 @@ fn push_boxes(cmd: char, map: &mut Vec<Vec<char>>, (x, y): (usize, usize)) -> bo
                             mark_left(x, y, i, map);
                             return true;
                         }
+                        return false;
                     }
                 }
                 
@@ -131,22 +255,27 @@ fn push_boxes(cmd: char, map: &mut Vec<Vec<char>>, (x, y): (usize, usize)) -> bo
                         return true;
                     }
                     else if map[i][x] == ']' && map[i][x + 1] == '[' {
-                        if push_boxes(cmd, map, (x, i)) && push_boxes(cmd, map, (x + 1, i)) {
+                        if can_push(cmd, map, (x, i)) && can_push(cmd, map, (x + 1, i)) {
+                            push_boxes(cmd, map, (x, i));
+                            push_boxes(cmd, map, (x + 1, i));
                             mark_right(x, y, i, map);
                             return true;
                         }
+                        return false;
                     }
                     else if map[i][x + 1] == '[' {
                         if push_boxes(cmd, map, (x + 1, i)) {
                             mark_right(x, y, i, map);
                             return true;
                         }
+                        return false;
                     }
                     else if map[i][x] == ']' {
                         if push_boxes(cmd, map, (x, i)) {
                             mark_right(x, y, i, map);
                             return true;
                         }
+                        return false;
                     }
                 }
                 else {
@@ -158,7 +287,9 @@ fn push_boxes(cmd: char, map: &mut Vec<Vec<char>>, (x, y): (usize, usize)) -> bo
                         return true
                     }
                     else if map[i][x] == '[' && map[i][x - 1] == ']' {
-                        if push_boxes(cmd, map, (x, i)) && push_boxes(cmd, map, (x - 1, i)) {
+                        if can_push(cmd, map, (x - 1, i)) && can_push(cmd, map, (x, i)) {
+                            push_boxes(cmd, map, (x - 1, i));
+                            push_boxes(cmd, map, (x, i));
                             mark_left(x, y, i, map);
                             return true;
                         }
@@ -176,6 +307,7 @@ fn push_boxes(cmd: char, map: &mut Vec<Vec<char>>, (x, y): (usize, usize)) -> bo
                             mark_left(x, y, i, map);
                             return true;
                         }
+                        return false;
                     }
                 }
             }
@@ -265,9 +397,13 @@ pub fn run(input: &(Vec<Vec<char>>, String)) {
             }
         }
     };
+    // println!("Starting map:");
+    // map.iter().for_each(|x| println!("{}", x.iter().collect::<String>()));
 
     for cmd in cmds.chars() {
+        // println!("\nMove: {cmd}");
         move_robot(cmd, &mut map, &mut pos);
+        // map.iter().for_each(|x| println!("{}", x.iter().collect::<String>()));
     }
     
     let mut sum = 0;
@@ -279,5 +415,6 @@ pub fn run(input: &(Vec<Vec<char>>, String)) {
             }
         }
     }
+    // map.iter().for_each(|x| println!("{}", x.iter().collect::<String>()));
     println!("Part 2: {}", sum);
 }
